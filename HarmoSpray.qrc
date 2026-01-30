@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/JICS">
+        <file>res/scope.png</file>
+        <file>res/red.png</file>
+        <file>res/triangleToRight.png</file>
+    </qresource>
+</RCC>
