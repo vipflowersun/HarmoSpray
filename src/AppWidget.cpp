@@ -70,6 +70,12 @@ AppWidget::AppWidget(QWidget *parent)
 		return;
 	}
 	std::vector<Kinematic::MDH> mdhs(6);
+	mdhs[0] = { 0, 0, 0, 0 };
+	mdhs[1] = { -M_PI_2, -M_PI_2, 0, 0 };
+	mdhs[2] = { 0, 0, 0, 0 };
+	mdhs[3] = { 0, -M_PI_2, 0, 0 };
+	mdhs[4] = { 0, M_PI_2, 0, 0 };
+	mdhs[5] = { M_PI, -M_PI_2, 0, };
 	mdhs[1].a = linkLengths[0];
 	mdhs[0].d = linkLengths[1];
 	mdhs[2].a = linkLengths[2];
