@@ -24,16 +24,27 @@ protected:
 private slots:
 	void onJointPositionsUpdatedGUI();
 	bool loadScene();
+	void onEditOffetEditingFinished();
+	void onEditSprayDistEditingFinished();
+	void onBtnStartSim();
+	void onBtnStopSim();
+	void onBtnSwitchFixture();
+	void startWpRotate();
+	void stopWpRotate();
 private:
 	void onJointPositionsUpdated(const std::map<std::string, std::vector<double>>& positions, uint64_t clock);
-
+	void onScriptStatusUpdated(const JMC::ScriptStatus& scriptStatus);
 private:
 	std::shared_ptr<Ui::AppWid> _ui;
 	JMC::Client _client;
 	std::shared_ptr<Model> _model;
+	std::shared_ptr<Model> _fixCylinder;
+	std::shared_ptr<Model> _fixCone;
+	std::shared_ptr<Model> _wpCylinder;
+	std::shared_ptr<Model> _wpCone;
 	Handle(AIS_Trihedron) _coordShape;
 	Handle(AIS_Trihedron) _coordShapeTool;
-	std::array<double, 6> _toolPoseToEndFlange = {100.5, 0, 637, 0, M_PI_4, 0};
 	std::vector<Eigen::Matrix4d> _matVec;
 	Kinematic _kinematic;
+	bool _useCylinder = true;
 };

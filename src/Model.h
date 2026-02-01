@@ -44,6 +44,7 @@ public:
 	void getMatrix(std::vector<Eigen::Matrix4d> &mats);
 	void setRootMatrix(const Eigen::Matrix4d &mat);
 	void setColor(int r, int g, int b);
+	void setTransparency(double transparency = 0.6);
 	void displayInOcc(OccView *occ);
 	void removeFromOcc(OccView *occ);
 	void setVisible(OccView *occ, bool visible);

@@ -103,6 +103,15 @@ void Model::setColor(int r, int g, int b)
 	}
 }
 
+void Model::setTransparency(double transparency)
+{
+	std::unique_lock<std::mutex> lck(_mutex);
+	for (const auto &part : _parts)
+	{
+		part->SetTransparency(transparency);
+	}
+}
+
 void Model::displayInOcc(OccView *occ)
 {
 	std::unique_lock<std::mutex> lck(_mutex);
