@@ -118,6 +118,7 @@ AppWidget::AppWidget(QWidget *parent)
 	connect(_ui->editSprayDist, &QLineEdit::editingFinished, this, &AppWidget::onEditSprayDistEditingFinished);
 	_client.onJointPositionsUpdated(std::bind(&AppWidget::onJointPositionsUpdated, this, std::placeholders::_1, std::placeholders::_2));
 	_client.onScriptStatusUpdated(std::bind(&AppWidget::onScriptStatusUpdated, this, std::placeholders::_1));
+	_client.onErrorUpdated(std::bind(&AppWidget::onErrorUpdated, this, std::placeholders::_1));
 }
 
 void AppWidget::showEvent(QShowEvent *event)
@@ -528,6 +529,18 @@ void AppWidget::onScriptStatusUpdated(const JMC::ScriptStatus& scriptStatus)
 	else
 	{
 		QMetaObject::invokeMethod(this, "stopWpRotate");
+	}
+}
+
+void AppWidget::onErrorUpdated(const std::string& error)
+{
+	if (_error == error)
+		return;
+	_error = error;
+	QStringList listStr = QString::fromStdString(error).split("\n");
+	for (const auto& str : listStr)
+	{
+		_ui->info->error(str);
 	}
 }
 

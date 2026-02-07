@@ -34,6 +34,7 @@ private slots:
 private:
 	void onJointPositionsUpdated(const std::map<std::string, std::vector<double>>& positions, uint64_t clock);
 	void onScriptStatusUpdated(const JMC::ScriptStatus& scriptStatus);
+	void onErrorUpdated(const std::string& error);
 private:
 	std::shared_ptr<Ui::AppWid> _ui;
 	JMC::Client _client;
@@ -47,4 +48,5 @@ private:
 	std::vector<Eigen::Matrix4d> _matVec;
 	Kinematic _kinematic;
 	bool _useCylinder = true;
+	std::string _error;
 };
