@@ -320,25 +320,37 @@ void AppWidget::onBtnStartSim()
 {
 	std::array<double, 6> toolPoseStart = { 0 };
 	std::array<double, 3> externalStart = { 0 };
+	double offsetX = _ui->editOffsetX->text().toDouble();
 	if (_useCylinder)
 	{
-		toolPoseStart[0] = _ui->editOffsetX->text().toDouble() - WP_CYLINDER_RADIUS;
+		if (offsetX > 0)
+			toolPoseStart[0] = offsetX - WP_CYLINDER_RADIUS;
+		else
+			toolPoseStart[0] = offsetX + WP_CYLINDER_RADIUS;
 		toolPoseStart[1] = _ui->editOffsetY->text().toDouble();
 		toolPoseStart[2] = _ui->editOffsetZ->text().toDouble();
 		toolPoseStart[3] = 0;
-		toolPoseStart[4] = 90;
+		if (offsetX > 0)
+			toolPoseStart[4] = 90;
+		else
+			toolPoseStart[4] = -90;
 		toolPoseStart[5] = 0;
 		externalStart[1] = WP_CYLINDER_START_Y;
 	}
 	else
 	{
 		double coneAngle = atan((WP_CONE_BOTTOM_RADIUS - WP_CONE_TOP_RADIUS) / WP_CONE_HEIGHT);
-
-		toolPoseStart[0] = _ui->editOffsetX->text().toDouble() - WP_CONE_BOTTOM_RADIUS;
+		if (offsetX > 0)
+			toolPoseStart[0] = offsetX - WP_CONE_BOTTOM_RADIUS;
+		else
+			toolPoseStart[0] = offsetX + WP_CONE_BOTTOM_RADIUS;
 		toolPoseStart[1] = _ui->editOffsetY->text().toDouble();
 		toolPoseStart[2] = _ui->editOffsetZ->text().toDouble();
 		toolPoseStart[3] = 0;
-		toolPoseStart[4] = 90 + JMath::R2D(coneAngle);
+		if (offsetX > 0)
+			toolPoseStart[4] = 90 + JMath::R2D(coneAngle);
+		else
+			toolPoseStart[4] = -90 - JMath::R2D(coneAngle);
 		toolPoseStart[5] = 0;
 		externalStart[1] = WP_CONE_START_Y;
 	}
@@ -352,13 +364,21 @@ void AppWidget::onBtnStartSim()
 	}
 	else
 	{
-		toolPoseEnd[0] = _ui->editOffsetX->text().toDouble() - WP_CONE_TOP_RADIUS;
+		if (offsetX > 0)
+			toolPoseEnd[0] = offsetX - WP_CONE_TOP_RADIUS;
+		else
+			toolPoseEnd[0] = offsetX + WP_CONE_TOP_RADIUS;
 		toolPoseEnd[2] = _ui->editOffsetZ->text().toDouble() + WP_CONE_HEIGHT;
 	}
 
 	double sprayVel = _ui->editYVel->text().toDouble();
 
 	std::string script;
+	script += std::format(
+		"moveJ(\"default\", {{{}, 0, 0, 0, 0, 0, 0, 0, 0}}, 100, 100, -1)\n",
+		offsetX > 0 ? 0 : -150
+	);
+
 	script += std::format(
 		"moveP(\"default\", {{{}, {}, {}, {}, {}, {}, {}, {}, {}}}, 100, 100, -1, \"sprayer\")\n",
 		toolPoseStart[0], toolPoseStart[1], toolPoseStart[2],
