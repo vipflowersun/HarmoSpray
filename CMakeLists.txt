@@ -133,11 +133,16 @@ install(DIRECTORY
     ${PROJECT_ROOT_DIR}/thirdParty/JMCClient/bin/debug/
     ${PROJECT_ROOT_DIR}/thirdParty/JMCServer/bin/debug/
     ${PROJECT_ROOT_DIR}/thirdParty/occ/bin/x64/debug/
-    ${PROJECT_ROOT_DIR}/thirdParty/Qt5.15.2/bin/*.dll
     DESTINATION ${PROJECT_OUTPUT_DIR}/debug
     CONFIGURATIONS Debug
     OPTIONAL
 )
+
+install(DIRECTORY 
+${PROJECT_ROOT_DIR}/thirdParty/Qt5.15.2/bin/
+DESTINATION ${PROJECT_OUTPUT_DIR}/debug
+CONFIGURATIONS Debug 
+FILES_MATCHING PATTERN "*.dll")
 
 install(DIRECTORY
     ${PROJECT_ROOT_DIR}/thirdParty/Qt5.15.2/mkspecs/
@@ -154,14 +159,33 @@ install(DIRECTORY
 )
 
 install(DIRECTORY
+    ${PROJECT_ROOT_DIR}/models/
+    DESTINATION ${PROJECT_OUTPUT_DIR}/debug/models
+    CONFIGURATIONS Debug
+    OPTIONAL
+)
+
+install(DIRECTORY
+    ${PROJECT_ROOT_DIR}/ini/
+    DESTINATION ${PROJECT_OUTPUT_DIR}/debug/ini
+    CONFIGURATIONS Debug
+    OPTIONAL
+)
+
+install(DIRECTORY
     ${PROJECT_ROOT_DIR}/thirdParty/JMCClient/bin/release/
     ${PROJECT_ROOT_DIR}/thirdParty/JMCServer/bin/release/
     ${PROJECT_ROOT_DIR}/thirdParty/occ/bin/x64/release/
-    ${PROJECT_ROOT_DIR}/thirdParty/Qt5.15.2/bin/*.dll
     DESTINATION ${PROJECT_OUTPUT_DIR}/release
     CONFIGURATIONS Release
     OPTIONAL
 )
+
+install(DIRECTORY 
+${PROJECT_ROOT_DIR}/thirdParty/Qt5.15.2/bin/
+DESTINATION ${PROJECT_OUTPUT_DIR}/release
+CONFIGURATIONS Release 
+FILES_MATCHING PATTERN "*.dll")
 
 install(DIRECTORY
     ${PROJECT_ROOT_DIR}/thirdParty/Qt5.15.2/mkspecs/
@@ -173,6 +197,20 @@ install(DIRECTORY
 install(DIRECTORY
     ${PROJECT_ROOT_DIR}/thirdParty/Qt5.15.2/plugins/
     DESTINATION ${PROJECT_OUTPUT_DIR}/release/plugins
+    CONFIGURATIONS Release
+    OPTIONAL
+)
+
+install(DIRECTORY
+    ${PROJECT_ROOT_DIR}/models/
+    DESTINATION ${PROJECT_OUTPUT_DIR}/release/models
+    CONFIGURATIONS Release
+    OPTIONAL
+)
+
+install(DIRECTORY
+    ${PROJECT_ROOT_DIR}/ini/
+    DESTINATION ${PROJECT_OUTPUT_DIR}/release/ini
     CONFIGURATIONS Release
     OPTIONAL
 )
