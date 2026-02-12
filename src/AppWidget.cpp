@@ -394,6 +394,8 @@ void AppWidget::onBtnStartSim()
 		sprayVel
 	);
 
+	_ui->tbScript->setPlainText(QString::fromStdString(script));
+
 	int err = _client.clearErrors();
 	if (err)
 	{
