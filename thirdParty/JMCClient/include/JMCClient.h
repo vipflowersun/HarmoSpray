@@ -252,6 +252,23 @@ namespace JMC
         /// @param devices 设备名称与类型的键值对列表
         /// @return 错误码
         int getSceneDevices(std::vector<std::pair<std::string, DeviceType>> & devices);
+		/// @brief 下载控制器的配置文件到本地
+        /// @param filePath 本地文件路径
+		/// @note 文件格式为jcf
+        /// @return 错误码
+        int downloadConfigFile(const std::string& filePath);
+        /// @brief 上传本地的控制器的配置文件到控制器
+        /// @param filePath 本地文件路径
+        /// @note 文件格式为jcf
+        /// @note 操作后需重启控制器生效
+        /// @return 错误码
+		int uploadConfigFile(const std::string& filePath);
+        /// @brief 重启控制器
+        /// @return 错误码
+        int restartController();
+        /// @brief 关闭控制器
+        /// @return 错误码
+		int poweroffController();
         /// @brief 获取设备所有工具
         /// @param device 设备名称
         /// @param tools 工具名称与安装位姿的键值对
@@ -430,6 +447,7 @@ namespace JMC
 		/// @param enableEA 当目标位置格式为[x,y,z,rx,ry,rz]指定是否使能外部轴联动
         /// @param tcp 工具名称 默认("")为末端法兰坐标系
         /// @param wcs 工件名称 默认("")为基座
+        /// @param process 工艺名称 默认("")为不配置工艺
         /// @return 错误码
         int moveL(const std::string &device,
                   const std::vector<double> &pose,
@@ -438,19 +456,22 @@ namespace JMC
                   double blendR,
                   bool enableEA,
                   const std::string &tcp = "",
-                  const std::string &wcs = "");
+                  const std::string &wcs = "",
+                  const std::string &process = "");
         /// @brief 直线运动
         /// @param device 设备名称
         /// @param teachPointName 示教点名称
         /// @param vel 速度百分比(0,100]
         /// @param acc 加速度百分比(0,100]
         /// @param blendR 平滑半径[0-1000]，0为不平滑，到此位置停止 [mm]
+        /// @param process 工艺名称 默认("")为不配置工艺
         /// @return 错误码
         int moveL(const std::string &device,
                   const std::string &teachPointName,
                   double vel,
                   double acc,
-                  double blendR);
+                  double blendR,
+                  const std::string& process = "");
         /// @brief 圆弧运动
         /// @param device 设备名称
         /// @param viaPose 途经点位姿
@@ -1202,6 +1223,19 @@ namespace JMC
         /// @param range ROIZ范围
         /// @return 错误码
         int scannerGetRoiZ(const std::string& device, std::array<double, 2>& range);
+        /// @brief 删除一个工艺
+        /// @param name 工艺名称
+        /// @return 错误码
+        int removeProcessor(const std::string& name);
+        /// @brief 新增一个焊接工艺
+        /// @param name 工艺名称
+        /// @return 错误码
+        int addProcessorWeld(const std::string& name);
+        /// @brief 运动队列休眠
+        /// @param device 设备名称
+		/// @param millisecond 休眠时间，单位毫秒
+        /// @return 错误码
+        int waitFifo(const std::string& device, double millisecond);
     private:
         ClientPrv *_prv;
     };

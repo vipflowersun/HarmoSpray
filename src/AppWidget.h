@@ -26,6 +26,8 @@ private slots:
 	bool loadScene();
 	void onEditOffetEditingFinished();
 	void onEditSprayDistEditingFinished();
+	void onCylinderShapeEditingFinished();
+	void onConeShapeEditingFinished();
 	void onBtnStartSim();
 	void onBtnStopSim();
 	void onBtnSwitchFixture();

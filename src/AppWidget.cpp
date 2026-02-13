@@ -33,22 +33,6 @@
 
 #define TOOL_NAME "sprayer"
 
-#define WP_CYLINDER_RADIUS  (750.0 / 2)
-
-#define WP_CYLINDER_HEIGHT  (6480.0)
-
-#define WP_CYLINDER_START_Y   (-2500.0)
-
-#define WP_CYLINDER_END_Y   (2500.0)
-
-#define WP_CONE_TOP_RADIUS  (100.0)
-
-#define WP_CONE_BOTTOM_RADIUS  (300.0)
-
-#define WP_CONE_HEIGHT  (1604.0)
-
-#define WP_CONE_START_Y (-2500.0)
-
 static gp_Trsf convertEigenToGpTrsf(const Eigen::Matrix4d &matrix)
 {
 	// 提取旋转部分
@@ -76,7 +60,7 @@ AppWidget::AppWidget(QWidget *parent)
 	_ui = std::make_shared<Ui::AppWid>();
 	_ui->setupUi(this);
 
-	SCENE.setLogLevel(1);
+	SCENE.setLogLevel(0xff);
 	SCENE.run();
 
 	int err = _client.connect("127.0.0.1");
@@ -116,6 +100,12 @@ AppWidget::AppWidget(QWidget *parent)
 	connect(_ui->editOffsetY, &QLineEdit::editingFinished, this, &AppWidget::onEditOffetEditingFinished);
 	connect(_ui->editOffsetZ, &QLineEdit::editingFinished, this, &AppWidget::onEditOffetEditingFinished);
 	connect(_ui->editSprayDist, &QLineEdit::editingFinished, this, &AppWidget::onEditSprayDistEditingFinished);
+	connect(_ui->editCylinderD, &QLineEdit::editingFinished, this, &AppWidget::onCylinderShapeEditingFinished);
+	connect(_ui->editCylinderH, &QLineEdit::editingFinished, this, &AppWidget::onCylinderShapeEditingFinished);
+	connect(_ui->editConeTopD, &QLineEdit::editingFinished, this, &AppWidget::onConeShapeEditingFinished);
+	connect(_ui->editConeBottomD, &QLineEdit::editingFinished, this, &AppWidget::onConeShapeEditingFinished);
+	connect(_ui->editConeH, &QLineEdit::editingFinished, this, &AppWidget::onConeShapeEditingFinished);
+
 	_client.onJointPositionsUpdated(std::bind(&AppWidget::onJointPositionsUpdated, this, std::placeholders::_1, std::placeholders::_2));
 	_client.onScriptStatusUpdated(std::bind(&AppWidget::onScriptStatusUpdated, this, std::placeholders::_1));
 	_client.onErrorUpdated(std::bind(&AppWidget::onErrorUpdated, this, std::placeholders::_1));
@@ -251,8 +241,8 @@ bool AppWidget::loadScene()
 
 	//圆柱工件
 	gp_Ax2 axis(gp_Pnt(0, 0, 0), gp_Dir(0, 1, 0));
-	Standard_Real radius = WP_CYLINDER_RADIUS;
-	Standard_Real height = WP_CYLINDER_HEIGHT;
+	Standard_Real radius = _ui->editCylinderD->text().toDouble() / 2;
+	Standard_Real height = _ui->editCylinderH->text().toDouble();
 	TopoDS_Shape cylShape = BRepPrimAPI_MakeCylinder(axis, radius, height).Shape();
 	Handle(AIS_Shape_WithFrame) cyl = new AIS_Shape_WithFrame(cylShape);
 	_wpCylinder = std::make_shared<Model>(std::list<Handle(AIS_Shape_WithFrame)>{ cyl });
@@ -263,9 +253,9 @@ bool AppWidget::loadScene()
 
 	//圆锥工件
 	axis = gp_Ax2(gp_Pnt(0, 0, 0), gp_Dir(0, 0, 1));
-	Standard_Real rBottom = WP_CONE_BOTTOM_RADIUS;
-	Standard_Real rTop = WP_CONE_TOP_RADIUS;
-	Standard_Real coneHeight = WP_CONE_HEIGHT;
+	Standard_Real rBottom = _ui->editConeBottomD->text().toDouble() / 2;
+	Standard_Real rTop = _ui->editConeTopD->text().toDouble() / 2;
+	Standard_Real coneHeight = _ui->editConeH->text().toDouble();
 	TopoDS_Shape coneShape = BRepPrimAPI_MakeCone(axis, rBottom, rTop, coneHeight).Shape();
 	Handle(AIS_Shape_WithFrame) cone = new AIS_Shape_WithFrame(coneShape);
 	_wpCone = std::make_shared<Model>(std::list<Handle(AIS_Shape_WithFrame)>{ cone });
@@ -316,6 +306,66 @@ void AppWidget::onEditSprayDistEditingFinished()
 	this->onJointPositionsUpdatedGUI();
 }
 
+void AppWidget::onCylinderShapeEditingFinished()
+{
+	//圆柱工件
+	if (_wpCylinder)
+		_wpCylinder->removeFromOcc(_ui->widOcc);
+
+	Eigen::Vector3d offset(0, 0, 0);
+	offset(0) = _ui->editOffsetX->text().toDouble();
+	offset(1) = _ui->editOffsetY->text().toDouble();
+	offset(2) = _ui->editOffsetZ->text().toDouble();
+
+	gp_Ax2 axis(gp_Pnt(0, 0, 0), gp_Dir(0, 1, 0));
+	Standard_Real radius = _ui->editCylinderD->text().toDouble() / 2;
+	Standard_Real height = _ui->editCylinderH->text().toDouble();
+	TopoDS_Shape cylShape = BRepPrimAPI_MakeCylinder(axis, radius, height).Shape();
+	Handle(AIS_Shape_WithFrame) cyl = new AIS_Shape_WithFrame(cylShape);
+	_wpCylinder = std::make_shared<Model>(std::list<Handle(AIS_Shape_WithFrame)>{ cyl });
+	_wpCylinder->setColor(50, 100, 150);
+	_wpCylinder->setTransparency();
+	_wpCylinder->displayInOcc(_ui->widOcc);
+	_wpCylinder->setMatrix({ JMath::makeTranslate(offset) });
+	if (_useCylinder)
+		_wpCylinder->setVisible(_ui->widOcc, true);
+	else
+		_wpCylinder->setVisible(_ui->widOcc, false);
+
+	_ui->widOcc->update();
+}
+
+void AppWidget::onConeShapeEditingFinished()
+{
+	//圆柱工件
+	if (_wpCone)
+		_wpCone->removeFromOcc(_ui->widOcc);
+
+	Eigen::Vector3d offset(0, 0, 0);
+	offset(0) = _ui->editOffsetX->text().toDouble();
+	offset(1) = _ui->editOffsetY->text().toDouble();
+	offset(2) = _ui->editOffsetZ->text().toDouble();
+
+	//圆锥工件
+	gp_Ax2 axis = gp_Ax2(gp_Pnt(0, 0, 0), gp_Dir(0, 0, 1));
+	Standard_Real rBottom = _ui->editConeBottomD->text().toDouble() / 2;
+	Standard_Real rTop = _ui->editConeTopD->text().toDouble() / 2;
+	Standard_Real coneHeight = _ui->editConeH->text().toDouble();
+	TopoDS_Shape coneShape = BRepPrimAPI_MakeCone(axis, rBottom, rTop, coneHeight).Shape();
+	Handle(AIS_Shape_WithFrame) cone = new AIS_Shape_WithFrame(coneShape);
+	_wpCone = std::make_shared<Model>(std::list<Handle(AIS_Shape_WithFrame)>{ cone });
+	_wpCone->setColor(50, 100, 150);
+	_wpCone->setTransparency();
+	_wpCone->displayInOcc(_ui->widOcc);
+	_wpCone->setMatrix({ JMath::makeTranslate(offset) });
+	if (_useCylinder)
+		_wpCone->setVisible(_ui->widOcc, false);
+	else
+		_wpCone->setVisible(_ui->widOcc, true);
+
+	_ui->widOcc->update();
+}
+
 void AppWidget::onBtnStartSim()
 {
 	std::array<double, 6> toolPoseStart = { 0 };
@@ -324,9 +374,9 @@ void AppWidget::onBtnStartSim()
 	if (_useCylinder)
 	{
 		if (offsetX > 0)
-			toolPoseStart[0] = offsetX - WP_CYLINDER_RADIUS;
+			toolPoseStart[0] = offsetX - _ui->editCylinderD->text().toDouble() / 2;
 		else
-			toolPoseStart[0] = offsetX + WP_CYLINDER_RADIUS;
+			toolPoseStart[0] = offsetX + _ui->editCylinderD->text().toDouble() / 2;
 		toolPoseStart[1] = _ui->editOffsetY->text().toDouble();
 		toolPoseStart[2] = _ui->editOffsetZ->text().toDouble();
 		toolPoseStart[3] = 0;
@@ -335,15 +385,16 @@ void AppWidget::onBtnStartSim()
 		else
 			toolPoseStart[4] = -90;
 		toolPoseStart[5] = 0;
-		externalStart[1] = WP_CYLINDER_START_Y;
+		//externalStart[1] = WP_CYLINDER_START_Y;
+		externalStart[1] = _ui->editOffsetY->text().toDouble() + 1000;
 	}
 	else
 	{
-		double coneAngle = atan((WP_CONE_BOTTOM_RADIUS - WP_CONE_TOP_RADIUS) / WP_CONE_HEIGHT);
+		double coneAngle = atan((_ui->editConeBottomD->text().toDouble() / 2 - _ui->editConeTopD->text().toDouble() / 2) / _ui->editConeH->text().toDouble());
 		if (offsetX > 0)
-			toolPoseStart[0] = offsetX - WP_CONE_BOTTOM_RADIUS;
+			toolPoseStart[0] = offsetX - _ui->editConeBottomD->text().toDouble() / 2;
 		else
-			toolPoseStart[0] = offsetX + WP_CONE_BOTTOM_RADIUS;
+			toolPoseStart[0] = offsetX + _ui->editConeBottomD->text().toDouble() / 2;
 		toolPoseStart[1] = _ui->editOffsetY->text().toDouble();
 		toolPoseStart[2] = _ui->editOffsetZ->text().toDouble();
 		toolPoseStart[3] = 0;
@@ -352,23 +403,25 @@ void AppWidget::onBtnStartSim()
 		else
 			toolPoseStart[4] = -90 - JMath::R2D(coneAngle);
 		toolPoseStart[5] = 0;
-		externalStart[1] = WP_CONE_START_Y;
+		//externalStart[1] = WP_CONE_START_Y;
+		externalStart[1] = _ui->editOffsetY->text().toDouble() + 1000;
 	}
 	
 	std::array<double, 6> toolPoseEnd = toolPoseStart;
 	std::array<double, 3> externalEnd = externalStart;
 	if (_useCylinder)
 	{
-		toolPoseEnd[1] += WP_CYLINDER_HEIGHT;
-		externalEnd[1] = WP_CYLINDER_END_Y;
+		toolPoseEnd[1] += _ui->editCylinderH->text().toDouble();
+		//externalEnd[1] = WP_CYLINDER_END_Y;
+		externalEnd[1] = externalStart[1] + _ui->editCylinderH->text().toDouble() - 1500;
 	}
 	else
 	{
 		if (offsetX > 0)
-			toolPoseEnd[0] = offsetX - WP_CONE_TOP_RADIUS;
+			toolPoseEnd[0] = offsetX - _ui->editConeTopD->text().toDouble() / 2;
 		else
-			toolPoseEnd[0] = offsetX + WP_CONE_TOP_RADIUS;
-		toolPoseEnd[2] = _ui->editOffsetZ->text().toDouble() + WP_CONE_HEIGHT;
+			toolPoseEnd[0] = offsetX + _ui->editConeTopD->text().toDouble() / 2;
+		toolPoseEnd[2] = _ui->editOffsetZ->text().toDouble() + _ui->editConeH->text().toDouble();
 	}
 
 	double sprayVel = _ui->editYVel->text().toDouble();
@@ -535,7 +588,8 @@ void AppWidget::onJointPositionsUpdated(const std::map<std::string, std::vector<
 void AppWidget::onScriptStatusUpdated(const JMC::ScriptStatus& scriptStatus)
 {
 	QWidget* wids[] = { _ui->btnSwitchFixture,  _ui->btnStartSim , _ui->editOffsetX, _ui->editOffsetY, _ui->editOffsetZ,
-	_ui->editSprayDist, _ui->editWpVel, _ui->editYVel };
+	_ui->editSprayDist, _ui->editWpVel, _ui->editYVel, _ui->editCylinderD, _ui->editCylinderH, _ui->editConeTopD, _ui->editConeBottomD,
+	_ui->editConeH };
 
 	bool enable = (scriptStatus != JMC::ScriptStatus::SCRIPT_RUNNING);
 

@@ -82,7 +82,7 @@ file(GLOB PROJECT_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
 
 #qt5_add_resources(PROJECT_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}.qrc)
 
-add_executable(${PROJECT_NAME}
+add_executable(${PROJECT_NAME} WIN32 
 	${PROJECT_SOURCES}
 )
 

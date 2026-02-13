@@ -16,6 +16,7 @@
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
 #include <BRepMesh_IncrementalMesh.hxx>
+#include <AIS_ViewCube.hxx>
 
 #include <QApplication>
 #include <QScreen>
@@ -80,6 +81,21 @@ OccView::OccView(QWidget *parent) noexcept
     SelectStyle->SetColor(SelectColor);
     SelectStyle->SetDisplayMode(AIS_Shaded);
     _context->SetHighlightStyle(Prs3d_TypeOfHighlight_Selected, SelectStyle);
+
+    // 添加viewcube
+    Handle(AIS_ViewCube) aViewCube = new AIS_ViewCube();
+    aViewCube->SetBoxTransparency(0.5);
+    Handle(Prs3d_Drawer) myDrawer = aViewCube->Attributes();
+    Handle(Prs3d_DatumAspect) datumAspect = new Prs3d_DatumAspect();
+    datumAspect->ShadingAspect(Prs3d_DP_XAxis)->SetColor(Quantity_NOC_RED);
+    datumAspect->ShadingAspect(Prs3d_DP_YAxis)->SetColor(Quantity_NOC_GREEN);
+    datumAspect->ShadingAspect(Prs3d_DP_ZAxis)->SetColor(Quantity_NOC_BLUE1);
+    datumAspect->TextAspect()->SetColor(Quantity_NOC_BLACK);
+    myDrawer->SetDatumAspect(datumAspect);
+    aViewCube->SetTransformPersistence(new Graphic3d_TransformPers(Graphic3d_TMF_TriedronPers,
+        Aspect_TOTP_RIGHT_UPPER,
+        Graphic3d_Vec2i(100, 100)));
+    getContext()->Display(aViewCube, false);
 
     _pixelRatio = qApp->primaryScreen()->devicePixelRatio();
     setMouseTracking(true);
