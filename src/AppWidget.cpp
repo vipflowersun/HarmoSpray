@@ -436,8 +436,7 @@ void AppWidget::onBtnStartSim()
 		"moveP(\"default\", {{{}, {}, {}, {}, {}, {}, {}, {}, {}}}, 100, 100, -1, \"sprayer\")\n",
 		toolPoseStart[0], toolPoseStart[1], toolPoseStart[2],
 		toolPoseStart[3], toolPoseStart[4], toolPoseStart[5],
-		externalStart[0], externalStart[1], externalStart[2],
-		sprayVel
+		externalStart[0], externalStart[1], externalStart[2]
 	);
 	script += std::format(
 		"moveL(\"default\", {{{}, {}, {}, {}, {}, {}, {}, {}, {}}}, {}, 100, -1, \"sprayer\")",

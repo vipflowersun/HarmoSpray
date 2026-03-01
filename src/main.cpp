@@ -10,9 +10,9 @@
 
 int main(int argc, char *argv[])
 {
-    // AllocConsole();
-    // freopen("CONOUT$", "w", stdout);
-    // freopen("CONOUT$", "w", stderr);
+     /*AllocConsole();
+     freopen("CONOUT$", "w", stdout);
+     freopen("CONOUT$", "w", stderr);*/
 
     QApplication a(argc, argv);
     a.setStyle(QStyleFactory::create("Fusion"));
