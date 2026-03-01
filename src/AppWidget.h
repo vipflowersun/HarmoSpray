@@ -31,6 +31,7 @@ private slots:
 	void onBtnStartSim();
 	void onBtnStopSim();
 	void onBtnSwitchFixture();
+	void onSelectionChanged();
 	void startWpRotate();
 	void stopWpRotate();
 private:

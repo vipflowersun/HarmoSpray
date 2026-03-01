@@ -12,6 +12,7 @@
 #include "BRepBuilderAPI_MakeEdge.hxx"
 #include "BRepPrimAPI_MakeCylinder.hxx"
 #include "BRepPrimAPI_MakeCone.hxx"
+#include "TopoDS.hxx"
 
 #include <QDebug>
 #include <QMessageBox>
@@ -105,6 +106,7 @@ AppWidget::AppWidget(QWidget *parent)
 	connect(_ui->editConeTopD, &QLineEdit::editingFinished, this, &AppWidget::onConeShapeEditingFinished);
 	connect(_ui->editConeBottomD, &QLineEdit::editingFinished, this, &AppWidget::onConeShapeEditingFinished);
 	connect(_ui->editConeH, &QLineEdit::editingFinished, this, &AppWidget::onConeShapeEditingFinished);
+	connect(_ui->widOcc, &OccView::selectionChanged, this, &AppWidget::onSelectionChanged);
 
 	_client.onJointPositionsUpdated(std::bind(&AppWidget::onJointPositionsUpdated, this, std::placeholders::_1, std::placeholders::_2));
 	_client.onScriptStatusUpdated(std::bind(&AppWidget::onScriptStatusUpdated, this, std::placeholders::_1));
@@ -203,6 +205,7 @@ bool AppWidget::loadScene()
 	_fixCylinder = std::make_shared<Model>(std::list<Handle(AIS_Shape_WithFrame)>{ shape });
 	_fixCylinder->setColor(150, 150, 150);
 	_fixCylinder->displayInOcc(_ui->widOcc);
+	_fixCylinder->setSelectable(true, TopAbs_VERTEX);
 	Eigen::Vector3d offset(0, 0, 0);
 	offset(0) = _ui->editOffsetX->text().toDouble();
 	offset(1) = _ui->editOffsetY->text().toDouble();
@@ -289,10 +292,14 @@ void AppWidget::onEditOffetEditingFinished()
 	offset(0) = _ui->editOffsetX->text().toDouble();
 	offset(1) = _ui->editOffsetY->text().toDouble();
 	offset(2) = _ui->editOffsetZ->text().toDouble();
-	_fixCylinder->setMatrix({ JMath::makeTranslate(offset) });
-	_wpCylinder->setMatrix({ JMath::makeTranslate(offset) });
-	_fixCone->setMatrix({ JMath::makeTranslate(offset) });
-	_wpCone->setMatrix({ JMath::makeTranslate(offset) });
+	if (_fixCylinder)
+		_fixCylinder->setMatrix({ JMath::makeTranslate(offset) });
+	if (_wpCylinder)
+		_wpCylinder->setMatrix({ JMath::makeTranslate(offset) });
+	if (_fixCone)
+		_fixCone->setMatrix({ JMath::makeTranslate(offset) });
+	if (_wpCone)
+		_wpCone->setMatrix({ JMath::makeTranslate(offset) });
 
 	_ui->widOcc->update();
 }
@@ -564,6 +571,20 @@ void AppWidget::onBtnSwitchFixture()
 	_useCylinder = !_useCylinder;
 
 	_ui->widOcc->update();
+}
+
+void AppWidget::onSelectionChanged()
+{
+	std::vector<Handle(AIS_InteractiveObject)> shapes;
+	std::vector<TopoDS_Shape> selectedTopos = _ui->widOcc->querySelection(shapes);
+	if (selectedTopos.size() != 1)
+		return;
+	TopoDS_Shape targetTopo = selectedTopos[0];
+	if (targetTopo.ShapeType() != TopAbs_VERTEX)
+		return;
+	TopoDS_Vertex vertex = TopoDS::Vertex(targetTopo);
+	gp_Pnt p = BRep_Tool::Pnt(vertex);
+	_ui->info->log(QStringLiteral("选中顶点坐标: (%1, %2, %3)").arg(p.X()).arg(p.Y()).arg(p.Z()));
 }
 
 void AppWidget::onJointPositionsUpdated(const std::map<std::string, std::vector<double>>& positions, uint64_t clock)
