@@ -46,6 +46,7 @@ public:
 	void setColor(int r, int g, int b);
 	void setTransparency(double transparency = 0.6);
 	void displayInOcc(OccView *occ);
+	void redisplayInOcc(OccView* occ);
 	void removeFromOcc(OccView *occ);
 	void setVisible(OccView *occ, bool visible);
 	bool setPartCoordMatrix(int index, const Eigen::Matrix4d &mat);

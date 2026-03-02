@@ -301,6 +301,11 @@ void AppWidget::onEditOffetEditingFinished()
 	if (_wpCone)
 		_wpCone->setMatrix({ JMath::makeTranslate(offset) });
 
+	if (_useCylinder && _fixCylinder)
+		_fixCylinder->redisplayInOcc(_ui->widOcc);
+	else if (!_useCylinder && _fixCone)
+		_fixCone->redisplayInOcc(_ui->widOcc);
+
 	_ui->widOcc->update();
 }
 

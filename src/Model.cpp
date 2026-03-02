@@ -60,20 +60,6 @@ bool Model::setMatrix(const std::vector<Eigen::Matrix4d> &mats)
 			part->SetLocalTransformation(Model::convertEigenToGpTrsf(mats[i++]));
 	}
 
-	for (const auto& part : _parts)
-	{
-		Handle(AIS_InteractiveContext) context = part->GetContext();
-		if (Handle(AIS_Shape_WithFrame) frameShape = Handle(AIS_Shape_WithFrame)::DownCast(part))
-		{
-			context->Redisplay(frameShape, Standard_False);
-			context->Redisplay(frameShape->frameShape(), Standard_False);
-		}
-		else
-		{
-			context->Redisplay(part, Standard_False);
-		}
-	}
-
 	_matrices = mats;
 	this->matrixChanged(mats);
 	return true;
@@ -144,6 +130,23 @@ void Model::displayInOcc(OccView *occ)
 			{
 				occ->getContext()->Activate(part, AIS_Shape::SelectionMode(static_cast<TopAbs_ShapeEnum>(i)));
 			}
+		}
+	}
+}
+
+void Model::redisplayInOcc(OccView* occ)
+{
+	for (const auto& part : _parts)
+	{
+		Handle(AIS_InteractiveContext) context = part->GetContext();
+		if (Handle(AIS_Shape_WithFrame) frameShape = Handle(AIS_Shape_WithFrame)::DownCast(part))
+		{
+			context->Redisplay(frameShape, Standard_False);
+			context->Redisplay(frameShape->frameShape(), Standard_False);
+		}
+		else
+		{
+			context->Redisplay(part, Standard_False);
 		}
 	}
 }
