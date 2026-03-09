@@ -395,9 +395,9 @@ void AppWidget::onBtnStartSim()
 		toolPoseStart[2] = _ui->editOffsetZ->text().toDouble();
 		toolPoseStart[3] = 0;
 		if (offsetX > 0)
-			toolPoseStart[4] = 90;
+			toolPoseStart[4] = 180;
 		else
-			toolPoseStart[4] = -90;
+			toolPoseStart[4] = -180;
 		toolPoseStart[5] = 0;
 		//externalStart[1] = WP_CYLINDER_START_Y;
 		externalStart[1] = _ui->editOffsetY->text().toDouble() + 1000;
@@ -413,9 +413,9 @@ void AppWidget::onBtnStartSim()
 		toolPoseStart[2] = _ui->editOffsetZ->text().toDouble();
 		toolPoseStart[3] = 0;
 		if (offsetX > 0)
-			toolPoseStart[4] = 90 + JMath::R2D(coneAngle);
+			toolPoseStart[4] = 180 + JMath::R2D(coneAngle);
 		else
-			toolPoseStart[4] = -90 - JMath::R2D(coneAngle);
+			toolPoseStart[4] = -180 - JMath::R2D(coneAngle);
 		toolPoseStart[5] = 0;
 		//externalStart[1] = WP_CONE_START_Y;
 		externalStart[1] = _ui->editOffsetY->text().toDouble() + 1000;
