@@ -91,7 +91,8 @@ AppWidget::AppWidget(QWidget *parent)
 	mdhs[3].d = linkLengths[4];
 	mdhs[5].d = linkLengths[5];
 	_kinematic.setMDH(mdhs);
-	_client.addTool(DEVICE_NAME, TOOL_NAME, { -400, 0, _ui->editSprayDist->text().toDouble(), 0, 0, 0});
+	double sprayDist = _ui->editSprayDist->text().toDouble();
+	_client.addTool(DEVICE_NAME, TOOL_NAME, { -400 - sprayDist, 0, 0, 0, 0, 0});
 
 	connect(_ui->btnFitAll, &QPushButton::clicked, this, [this]() { _ui->widOcc->fitAll(); });
 	connect(_ui->btnStartSim, &QPushButton::clicked, this, &AppWidget::onBtnStartSim);
@@ -130,8 +131,8 @@ void AppWidget::onJointPositionsUpdatedGUI()
 	double sprayDist = _ui->editSprayDist->text().toDouble();
 	std::array<double, 6> endFlangePose;
 	endFlangePose.fill(0);
-	endFlangePose[0] = -400;
-	endFlangePose[2] = sprayDist;
+	endFlangePose[0] = -400 - sprayDist;
+	endFlangePose[2] = 0;
 	_coordShapeTool->SetLocalTransformation(convertEigenToGpTrsf(_matVec.back() * JMath::xyzrpyToTransformMatrix(endFlangePose)));
 	_ui->widOcc->update();
 }
@@ -313,7 +314,8 @@ void AppWidget::onEditOffetEditingFinished()
 
 void AppWidget::onEditSprayDistEditingFinished()
 {
-	if (int err = _client.setToolPose(DEVICE_NAME, TOOL_NAME, { -400, 0, _ui->editSprayDist->text().toDouble(), 0, 0, 0 }))
+	double sprayDist = _ui->editSprayDist->text().toDouble();
+	if (int err = _client.setToolPose(DEVICE_NAME, TOOL_NAME, { -400 - sprayDist, 0, 0, 0, 0, 0 }))
 	{
 		_ui->info->error(QStringLiteral("setToolPose失败, 错误码: %1").arg(err));
 	}
