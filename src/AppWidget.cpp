@@ -92,7 +92,7 @@ AppWidget::AppWidget(QWidget *parent)
 	mdhs[5].d = linkLengths[5];
 	_kinematic.setMDH(mdhs);
 	double sprayDist = _ui->editSprayDist->text().toDouble();
-	_client.addTool(DEVICE_NAME, TOOL_NAME, { -400 - sprayDist, 0, 0, 0, 0, 0});
+	_client.addTool(DEVICE_NAME, TOOL_NAME, { 400 + sprayDist, 0, 0, 0, 0, 0 });
 
 	connect(_ui->btnFitAll, &QPushButton::clicked, this, [this]() { _ui->widOcc->fitAll(); });
 	connect(_ui->btnStartSim, &QPushButton::clicked, this, &AppWidget::onBtnStartSim);
@@ -131,7 +131,7 @@ void AppWidget::onJointPositionsUpdatedGUI()
 	double sprayDist = _ui->editSprayDist->text().toDouble();
 	std::array<double, 6> endFlangePose;
 	endFlangePose.fill(0);
-	endFlangePose[0] = -400 - sprayDist;
+	endFlangePose[0] = 400 + sprayDist;
 	endFlangePose[2] = 0;
 	_coordShapeTool->SetLocalTransformation(convertEigenToGpTrsf(_matVec.back() * JMath::xyzrpyToTransformMatrix(endFlangePose)));
 	_ui->widOcc->update();
@@ -315,7 +315,7 @@ void AppWidget::onEditOffetEditingFinished()
 void AppWidget::onEditSprayDistEditingFinished()
 {
 	double sprayDist = _ui->editSprayDist->text().toDouble();
-	if (int err = _client.setToolPose(DEVICE_NAME, TOOL_NAME, { -400 - sprayDist, 0, 0, 0, 0, 0 }))
+	if (int err = _client.setToolPose(DEVICE_NAME, TOOL_NAME, { 400 + sprayDist, 0, 0, 0, 0, 0 }))
 	{
 		_ui->info->error(QStringLiteral("setToolPose失败, 错误码: %1").arg(err));
 	}
@@ -396,12 +396,9 @@ void AppWidget::onBtnStartSim()
 		toolPoseStart[1] = _ui->editOffsetY->text().toDouble();
 		toolPoseStart[2] = _ui->editOffsetZ->text().toDouble();
 		toolPoseStart[3] = 0;
-		if (offsetX > 0)
-			toolPoseStart[4] = 180;
-		else
-			toolPoseStart[4] = -180;
-		toolPoseStart[5] = 0;
-		//externalStart[1] = WP_CYLINDER_START_Y;
+		toolPoseStart[4] = 0;
+		if (offsetX < 0)
+			toolPoseStart[5] = 180;
 		externalStart[1] = _ui->editOffsetY->text().toDouble() + 1000;
 	}
 	else
@@ -415,11 +412,12 @@ void AppWidget::onBtnStartSim()
 		toolPoseStart[2] = _ui->editOffsetZ->text().toDouble();
 		toolPoseStart[3] = 0;
 		if (offsetX > 0)
-			toolPoseStart[4] = 180 + JMath::R2D(coneAngle);
+			toolPoseStart[4] = JMath::R2D(coneAngle);
 		else
-			toolPoseStart[4] = -180 - JMath::R2D(coneAngle);
-		toolPoseStart[5] = 0;
-		//externalStart[1] = WP_CONE_START_Y;
+		{
+			toolPoseStart[4] = -JMath::R2D(coneAngle);
+			toolPoseStart[5] = 180;
+		}
 		externalStart[1] = _ui->editOffsetY->text().toDouble() + 1000;
 	}
 	
